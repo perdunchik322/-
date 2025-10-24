@@ -35,21 +35,40 @@ class Ui_MainWindow(object):
         self.tableView_of_tasks = QtWidgets.QTableView(parent=self.tab_3)
         self.tableView_of_tasks.setGeometry(QtCore.QRect(0, 40, 1791, 691))
         self.tableView_of_tasks.setObjectName("tableView_of_tasks")
-        self.layoutWidget = QtWidgets.QWidget(parent=self.tab_3)
-        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 303, 28))
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.horizontalLayout_5 = QtWidgets.QHBoxLayout(self.layoutWidget)
-        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.widget = QtWidgets.QWidget(parent=self.tab_3)
+        self.widget.setGeometry(QtCore.QRect(10, 10, 856, 30))
+        self.widget.setObjectName("widget")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.widget)
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.Add_task_button = QtWidgets.QPushButton(parent=self.layoutWidget)
+        self.Add_task_button = QtWidgets.QPushButton(parent=self.widget)
         self.Add_task_button.setObjectName("Add_task_button")
         self.horizontalLayout_5.addWidget(self.Add_task_button)
-        self.Delete_task_button = QtWidgets.QPushButton(parent=self.layoutWidget)
+        self.Delete_task_button = QtWidgets.QPushButton(parent=self.widget)
         self.Delete_task_button.setObjectName("Delete_task_button")
         self.horizontalLayout_5.addWidget(self.Delete_task_button)
-        self.rewrite_task_button = QtWidgets.QPushButton(parent=self.layoutWidget)
+        self.rewrite_task_button = QtWidgets.QPushButton(parent=self.widget)
         self.rewrite_task_button.setObjectName("rewrite_task_button")
         self.horizontalLayout_5.addWidget(self.rewrite_task_button)
+        self.horizontalLayout_6.addLayout(self.horizontalLayout_5)
+        self.filter_button = QtWidgets.QPushButton(parent=self.widget)
+        self.filter_button.setObjectName("filter_button")
+        self.horizontalLayout_6.addWidget(self.filter_button)
+        self.filter_subject = QtWidgets.QLineEdit(parent=self.widget)
+        self.filter_subject.setObjectName("filter_subject")
+        self.horizontalLayout_6.addWidget(self.filter_subject)
+        self.label_3 = QtWidgets.QLabel(parent=self.widget)
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout_6.addWidget(self.label_3)
+        self.filter_priority = QtWidgets.QComboBox(parent=self.widget)
+        self.filter_priority.setObjectName("filter_priority")
+        self.filter_priority.addItem("")
+        self.filter_priority.addItem("")
+        self.filter_priority.addItem("")
+        self.filter_priority.addItem("")
+        self.horizontalLayout_6.addWidget(self.filter_priority)
         self.main_tabs.addTab(self.tab_3, "")
         self.tab_1 = QtWidgets.QWidget()
         self.tab_1.setObjectName("tab_1")
@@ -60,16 +79,16 @@ class Ui_MainWindow(object):
         self.label = QtWidgets.QLabel(parent=self.main_screen)
         self.label.setGeometry(QtCore.QRect(20, 20, 431, 18))
         self.label.setObjectName("label")
-        self.layoutWidget1 = QtWidgets.QWidget(parent=self.main_screen)
-        self.layoutWidget1.setGeometry(QtCore.QRect(1620, 30, 185, 28))
-        self.layoutWidget1.setObjectName("layoutWidget1")
-        self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.layoutWidget1)
+        self.layoutWidget = QtWidgets.QWidget(parent=self.main_screen)
+        self.layoutWidget.setGeometry(QtCore.QRect(1620, 30, 185, 28))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.layoutWidget)
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.lessons_button = QtWidgets.QPushButton(parent=self.layoutWidget1)
+        self.lessons_button = QtWidgets.QPushButton(parent=self.layoutWidget)
         self.lessons_button.setObjectName("lessons_button")
         self.horizontalLayout_4.addWidget(self.lessons_button)
-        self.settings_button = QtWidgets.QPushButton(parent=self.layoutWidget1)
+        self.settings_button = QtWidgets.QPushButton(parent=self.layoutWidget)
         self.settings_button.setObjectName("settings_button")
         self.horizontalLayout_4.addWidget(self.settings_button)
         self.stackedWidget.addWidget(self.main_screen)
@@ -78,31 +97,31 @@ class Ui_MainWindow(object):
         self.lineEdit = QtWidgets.QLineEdit(parent=self.page_7)
         self.lineEdit.setGeometry(QtCore.QRect(80, 60, 561, 26))
         self.lineEdit.setObjectName("lineEdit")
-        self.layoutWidget2 = QtWidgets.QWidget(parent=self.page_7)
-        self.layoutWidget2.setGeometry(QtCore.QRect(1610, 30, 190, 28))
-        self.layoutWidget2.setObjectName("layoutWidget2")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.layoutWidget2)
+        self.layoutWidget1 = QtWidgets.QWidget(parent=self.page_7)
+        self.layoutWidget1.setGeometry(QtCore.QRect(1610, 30, 190, 28))
+        self.layoutWidget1.setObjectName("layoutWidget1")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.layoutWidget1)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.back_button = QtWidgets.QPushButton(parent=self.layoutWidget2)
+        self.back_button = QtWidgets.QPushButton(parent=self.layoutWidget1)
         self.back_button.setObjectName("back_button")
         self.horizontalLayout_2.addWidget(self.back_button)
-        self.lessons_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget2)
+        self.lessons_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget1)
         self.lessons_button_2.setObjectName("lessons_button_2")
         self.horizontalLayout_2.addWidget(self.lessons_button_2)
         self.stackedWidget.addWidget(self.page_7)
         self.page_8 = QtWidgets.QWidget()
         self.page_8.setObjectName("page_8")
-        self.layoutWidget3 = QtWidgets.QWidget(parent=self.page_8)
-        self.layoutWidget3.setGeometry(QtCore.QRect(1600, 30, 196, 28))
-        self.layoutWidget3.setObjectName("layoutWidget3")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.layoutWidget3)
+        self.layoutWidget2 = QtWidgets.QWidget(parent=self.page_8)
+        self.layoutWidget2.setGeometry(QtCore.QRect(1600, 30, 196, 28))
+        self.layoutWidget2.setObjectName("layoutWidget2")
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.layoutWidget2)
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.back_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget3)
+        self.back_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget2)
         self.back_button_2.setObjectName("back_button_2")
         self.horizontalLayout_3.addWidget(self.back_button_2)
-        self.settings_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget3)
+        self.settings_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget2)
         self.settings_button_2.setObjectName("settings_button_2")
         self.horizontalLayout_3.addWidget(self.settings_button_2)
         self.stackedWidget.addWidget(self.page_8)
@@ -124,10 +143,16 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.main_tabs.setToolTip(_translate("MainWindow", "<html><head/><body><p>Сосал?</p></body></html>"))
+        self.main_tabs.setToolTip(_translate("MainWindow", "<html><head/><body><p>выф</p></body></html>"))
         self.Add_task_button.setText(_translate("MainWindow", "+Добавить"))
         self.Delete_task_button.setText(_translate("MainWindow", "Удалить"))
         self.rewrite_task_button.setText(_translate("MainWindow", "Перезаписать"))
+        self.filter_button.setText(_translate("MainWindow", "Фильтр по предмету:"))
+        self.label_3.setText(_translate("MainWindow", "По приоритету"))
+        self.filter_priority.setItemText(0, _translate("MainWindow", "Высокий"))
+        self.filter_priority.setItemText(1, _translate("MainWindow", "Средний"))
+        self.filter_priority.setItemText(2, _translate("MainWindow", "Низкий"))
+        self.filter_priority.setItemText(3, _translate("MainWindow", "Любой"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.tab_3), _translate("MainWindow", "Все задания"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.tab_1), _translate("MainWindow", "Сегодня"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.tab_2), _translate("MainWindow", "На неделю"))
@@ -150,9 +175,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def initUi(self):
         self.base()  # Создание базы основных заданий
-        self.Add_task_button.clicked.connect(self.add_task)  # Подключаем сигнал добавления задания
-        self.Delete_task_button.clicked.connect(self.delete_task)  # Подключаем сигнал удаления задания
-        self.rewrite_task_button.clicked.connect(self.rewrite_task)
+        self.Add_task_button.clicked.connect(self.add_task)  # Подключаем сигнал кнопки добавления задания
+        self.Delete_task_button.clicked.connect(self.delete_task)  # Подключаем сигнал кнопки удаления задания
+        self.rewrite_task_button.clicked.connect(self.rewrite_task)  # Подключаем сигнал кнопки перезаписи
+        self.filter_button.clicked.connect(self.filter)  # Подключаем сигнал кнопки фильтрации
         self.navigation()  # Отдельная функция для навигации по стеку
         self.init_main_table()  # Иницилизирование модели таблицы
 
@@ -253,6 +279,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             con.commit()
             con.close()
 
+    # Дописать QmessageBox
     def rewrite_task(self):  # Перезапись строк в модели и в базе
         dialog = RewriteTaskDialog(self)
         result = dialog.exec()
@@ -296,8 +323,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ))
         con.commit()
 
+    def filter(self):
+        self.model_of_main.clear()  # отчищаем табл от всех заданий
+        self.model_of_main.setHorizontalHeaderLabels(
+            ["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])  # Ставим заголовки т.к. они тоже очистились
+        con = sqlite3.connect("all_tasks.db")
+        cur = con.cursor()
+        if self.filter_priority.currentText() == "Любой":
+            needs = self.filter_subject.text()  # Фильтр тех что нужны
+            # Выполняем запрос с условием отделения
+            finder = """SELECT * FROM all_tasks WHERE subject = ?"""
+            result = cur.execute(finder, (needs,))
+            rows = result.fetchall()
+        else:
+            needs = [self.filter_subject.text(), self.filter_priority.currentText()]  # Фильтр тех что нужны
+            # Выполняем запрос с условием отделения
+            finder = """SELECT * FROM all_tasks WHERE subject = ? AND priority = ?"""
+            result = cur.execute(finder, (needs[0], needs[1]))
+            rows = result.fetchall()
+            # Заполняем модель данными
+        for row_index, row_data in enumerate(rows):
+            for col_index, cell_data in enumerate(row_data):
+                item = QStandardItem(str(cell_data))
+                self.model_of_main.setItem(row_index, col_index - 1, item)
+
     def logger(self):
-        pass #В разработке
+        pass  # В разработке
 
     def navigation(self):  # подключение кнопок навигации по стеку
         self.settings_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
