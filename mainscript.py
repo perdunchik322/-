@@ -124,7 +124,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.main_tabs.setToolTip(_translate("MainWindow", "<html><head/><body><p>выф</p></body></html>"))
+        self.main_tabs.setToolTip(_translate("MainWindow", "<html><head/><body><p>Сосал?</p></body></html>"))
         self.Add_task_button.setText(_translate("MainWindow", "+Добавить"))
         self.Delete_task_button.setText(_translate("MainWindow", "Удалить"))
         self.rewrite_task_button.setText(_translate("MainWindow", "Перезаписать"))
