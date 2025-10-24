@@ -149,13 +149,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initUi()
 
     def initUi(self):
+        self.base()# Создание базы основных заданий
         self.Add_task_button.clicked.connect(self.add_task)  # Подключаем сигнал добавления задания
         self.Delete_task_button.clicked.connect(self.delete_task)  # Подключаем сигнал удаления задания
         self.rewrite_task_button.clicked.connect(self.rewrite_task)
         self.navigation()  # Отдельная функция для навигации по стеку
         self.init_main_table()  # Иницилизирование модели таблицы
-        self.base()  # Создание базы основных заданий
-
+      
     def base(self):
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
