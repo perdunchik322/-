@@ -149,13 +149,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initUi()
 
     def initUi(self):
-        self.base()# Создание базы основных заданий
+        self.base()  # Создание базы основных заданий
         self.Add_task_button.clicked.connect(self.add_task)  # Подключаем сигнал добавления задания
         self.Delete_task_button.clicked.connect(self.delete_task)  # Подключаем сигнал удаления задания
         self.rewrite_task_button.clicked.connect(self.rewrite_task)
         self.navigation()  # Отдельная функция для навигации по стеку
         self.init_main_table()  # Иницилизирование модели таблицы
-      
+
     def base(self):
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
@@ -236,7 +236,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             dialog = DeleteTaskDialog(self)
             result = dialog.exec()
             con = sqlite3.connect("all_tasks.db")
-            if result == QDialog.DialogCode.Accepted: # Проверили нажали-ли на кнопку "Удалить"
+            if result == QDialog.DialogCode.Accepted:  # Проверили нажали-ли на кнопку "Удалить"
                 line = []
                 for column in range(self.model_of_main.columnCount()):
                     index = self.model_of_main.index(int(dialog.line_edit.text()) - 1, column)
@@ -253,20 +253,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             con.commit()
             con.close()
 
-    def rewrite_task(self):# Перезапись строк в модели и в базе
-        try:
-            dialog = RewriteTaskDialog(self)
-            result = dialog.exec()
-            con = sqlite3.connect("all_tasks.db")
-            if result == QDialog.DialogCode.Accepted:
-                line = str(dialog.line_edit.text()).split(", ")
-                row = int(line[0])
-                for i in range(self.model_of_main.columnCount()):
-                    index = self.model_of_main.index(row - 1, i)# индекс ячейки
-                    self.model_of_main.setData(index, line[i])# изменение данных по индексу
-        finally:
-            con.commit()
-            con.close
+    def rewrite_task(self):  # Перезапись строк в модели и в базе
+        dialog = RewriteTaskDialog(self)
+        result = dialog.exec()
+        con = sqlite3.connect("all_tasks.db")
+        cur = con.cursor()
+        inp = str(dialog.line_edit.text()).split(", ")
+        if result == QDialog.DialogCode.Accepted:  # то что в таблице до редактирования
+            line = []
+            for column in range(self.model_of_main.columnCount()):
+                index = self.model_of_main.index(int(inp[0]) - 1, column)
+                value = self.model_of_main.data(index)
+                line.append(value)
+            pr_subject, pr_task, pr_deadline, pr_priority, pr_stat = line  # Старые значения строки в бд
+            # заполнение таблицы новыми данными
+            line = str(dialog.line_edit.text()).split(", ")
+            row = int(line[0])
+            for i in range(self.model_of_main.columnCount() - 2):
+                index = self.model_of_main.index(row - 1, i)  # строка-1, столбец i
+                self.model_of_main.setData(index, line[i + 1])  # изменение данных по индексу
+            index = self.model_of_main.index(row - 1, 3)
+            self.model_of_main.setData(index, dialog.priority.currentText())
+            index = self.model_of_main.index(row - 1, 4)
+            self.model_of_main.setData(index, dialog.status.currentText())
+        # Перезаписываем в бд
+        updater = """
+        UPDATE all_tasks 
+        SET subject = ?, task = ?, deadline = ?, priority = ?, stat = ? 
+        WHERE subject = ? AND task = ? AND deadline = ? AND priority = ? AND stat = ?
+        """
+        cur.execute(updater, (
+            line[1],  # новый subject
+            line[2],  # новый task
+            line[3],  # новый deadline
+            dialog.priority.currentText(),  # новый priority
+            dialog.status.currentText(),  # новый stat
+            pr_subject,
+            pr_task,
+            pr_deadline,
+            pr_priority,
+            pr_stat
+        ))
+        con.commit()
+
+    def logger(self):
+        pass #В разработке
+
     def navigation(self):  # подключение кнопок навигации по стеку
         self.settings_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
         self.settings_button_2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
@@ -285,7 +317,7 @@ class AddTaskDialog(QDialog):
     def initUi(self):
         layout = QVBoxLayout(self)
         self.ask = QLabel(
-            'Введите задание в таком формате:Предмет, Текст задания, Дедлайн(день.мес.год). И выберите приоритет')
+            'Введите задание в таком формате:Предмет, Текст задания, Дедлайн(dd.mm.yy). И выберите приоритет')
         input_layout = QHBoxLayout()
         self.line_edit = QLineEdit()
         self.priority = QComboBox()
@@ -330,15 +362,19 @@ class RewriteTaskDialog(QDialog):
     def initUi(self):
         layout = QVBoxLayout(self)
         self.ask = QLabel(
-            "Введите номер и новое задание в таком формате:номер, Предмет, Текст задания, Дедлайн(день.мес.год). И выберите приоритет")
+            "Введите номер и новое задание в таком формате:номер, Предмет, Текст задания, Дедлайн(dd.mm.yy). И выберите приоритет и статус")
         input_layout = QHBoxLayout()
         self.line_edit = QLineEdit()
         self.priority = QComboBox()
         self.priority.addItem("Высокий")
         self.priority.addItem("Средний")
         self.priority.addItem("Низкий")
+        self.status = QComboBox()
+        self.status.addItem("Выполнено")
+        self.status.addItem("Не выполнено")
         input_layout.addWidget(self.line_edit)
         input_layout.addWidget(self.priority)
+        input_layout.addWidget(self.status)
         self.add_button = QPushButton("Перезаписать")
         layout.addWidget(self.ask)
         layout.addLayout(input_layout)
