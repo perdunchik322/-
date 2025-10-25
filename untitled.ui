@@ -173,11 +173,31 @@
          <attribute name="title">
           <string>Сегодня</string>
          </attribute>
+         <widget class="QTableWidget" name="today_tasks_table">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>1791</width>
+            <height>731</height>
+           </rect>
+          </property>
+         </widget>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
           <string>На неделю</string>
          </attribute>
+         <widget class="QTableWidget" name="week_tasks_table">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>1791</width>
+            <height>731</height>
+           </rect>
+          </property>
+         </widget>
         </widget>
        </widget>
        <widget class="QLabel" name="label">
