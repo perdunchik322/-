@@ -391,9 +391,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.today_tasks_table.setHorizontalHeaderLabels(["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])
         self.today_tasks_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         for i in range(len(rows)):
-            for j in range(6):
-                self.today_tasks_table.setItem(i, j - 1, QTableWidgetItem(rows[i][j]))
-
+            for j in range(5):
+                self.today_tasks_table.setItem(i, j, QTableWidgetItem(rows[i][j + 1]))
         con.close()
 
     """Реализация вкладки 'На неделю'"""
