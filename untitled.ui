@@ -76,7 +76,7 @@
            <rect>
             <x>10</x>
             <y>10</y>
-            <width>856</width>
+            <width>971</width>
             <height>30</height>
            </rect>
           </property>
@@ -157,6 +157,13 @@
                <string>Любой</string>
               </property>
              </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="del_all_button">
+             <property name="text">
+              <string>Очистить всё</string>
+             </property>
             </widget>
            </item>
           </layout>
