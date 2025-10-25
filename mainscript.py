@@ -1,5 +1,7 @@
 import sqlite3
 import datetime
+from asyncio import all_tasks
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QTableView,
@@ -137,6 +139,26 @@ class Ui_MainWindow(object):
         self.settings_button_2 = QtWidgets.QPushButton(parent=self.layoutWidget2)
         self.settings_button_2.setObjectName("settings_button_2")
         self.horizontalLayout_3.addWidget(self.settings_button_2)
+        self.all_subject_table = QtWidgets.QTableWidget(parent=self.page_8)
+        self.all_subject_table.setGeometry(QtCore.QRect(10, 30, 871, 901))
+        self.all_subject_table.setObjectName("all_subject_table")
+        self.all_subject_table.setColumnCount(0)
+        self.all_subject_table.setRowCount(0)
+        self.layoutWidget1 = QtWidgets.QWidget(parent=self.page_8)
+        self.layoutWidget1.setGeometry(QtCore.QRect(890, 320, 231, 221))
+        self.layoutWidget1.setObjectName("layoutWidget1")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.layoutWidget1)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.add_subject_button = QtWidgets.QPushButton(parent=self.layoutWidget1)
+        self.add_subject_button.setObjectName("add_subject_button")
+        self.verticalLayout.addWidget(self.add_subject_button)
+        self.delete_subject_button = QtWidgets.QPushButton(parent=self.layoutWidget1)
+        self.delete_subject_button.setObjectName("delete_subject_button")
+        self.verticalLayout.addWidget(self.delete_subject_button)
+        self.edit_subject_button = QtWidgets.QPushButton(parent=self.layoutWidget1)
+        self.edit_subject_button.setObjectName("edit_subject_button")
+        self.verticalLayout.addWidget(self.edit_subject_button)
         self.stackedWidget.addWidget(self.page_8)
         self.horizontalLayout.addWidget(self.stackedWidget)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -149,7 +171,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
         self.main_tabs.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -178,6 +200,9 @@ class Ui_MainWindow(object):
         self.lessons_button_2.setText(_translate("MainWindow", "Предметы"))
         self.back_button_2.setText(_translate("MainWindow", "Назад"))
         self.settings_button_2.setText(_translate("MainWindow", "Настройки"))
+        self.add_subject_button.setText(_translate("MainWindow", "Добавить"))
+        self.delete_subject_button.setText(_translate("MainWindow", "Удалить"))
+        self.edit_subject_button.setText(_translate("MainWindow", "Редактировть"))
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -201,15 +226,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
 
+        # Таблица всех заданий
         cur.execute("""
         CREATE TABLE IF NOT EXISTS all_tasks(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        subject TEXT,
-        task TEXT,
-        deadline TEXT,
-        priority TEXT,
-        stat TEXT)
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject TEXT,
+            task TEXT,
+            deadline TEXT,
+            priority TEXT,
+            stat TEXT
+        );
         """)
+
+        # Таблица тем или чего-то связанного
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS all_subject(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            th_name TEXT
+        );
+        """)
+
+        con.commit()
+        con.close()
     """Всё для вкладки 'Все задания'"""
     def init_main_table(self):
         con = sqlite3.connect("all_tasks.db")
@@ -370,6 +409,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             cur.execute("DELETE FROM all_tasks")
             con.commit()
             con.close()
+            self.model_of_main.setHorizontalHeaderLabels(["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])
         else:
             pass
 
@@ -411,18 +451,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.week_tasks_table.setColumnCount(5)
         self.week_tasks_table.setHorizontalHeaderLabels(["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])
         self.week_tasks_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        print(rows)
         for i in range(len(rows)):
             for j in range(6):
                 self.week_tasks_table.setItem(i, j - 1, QTableWidgetItem(rows[i][j]))
 
         con.close()
 
+    def init_subject_table(self):
+        con = sqlite3.connect("all_tasks.db")
+        cur = con.cursor()
+
+        table = cur.execute("SELECT * FROM all_subject").fetchall()
+
+
+        con.close()
+
     def navigation(self):  # подключение кнопок навигации по стеку
         self.settings_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
         self.settings_button_2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
-        self.lessons_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(2))
-        self.lessons_button_2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(2))
+        self.lessons_button.clicked.connect(lambda: (self.stackedWidget.setCurrentIndex(2), self.init_subject_table()))
+        self.lessons_button_2.clicked.connect(lambda: (self.stackedWidget.setCurrentIndex(2), self.init_subject_table()))
         self.back_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
         self.back_button_2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
 
