@@ -5,7 +5,7 @@ import sys
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QTableView,
                              QVBoxLayout, QWidget, QPushButton,
                              QLineEdit, QHBoxLayout, QHeaderView,
-                             QMessageBox, QDialog, QLabel, QComboBox)
+                             QMessageBox, QDialog, QLabel, QComboBox, QTableWidgetItem)
 from PyQt6.QtCore import Qt, QSortFilterProxyModel
 from PyQt6.QtGui import QStandardItemModel, QStandardItem, QAction
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -75,9 +75,19 @@ class Ui_MainWindow(object):
         self.main_tabs.addTab(self.tab_3, "")
         self.tab_1 = QtWidgets.QWidget()
         self.tab_1.setObjectName("tab_1")
+        self.today_tasks_table = QtWidgets.QTableWidget(parent=self.tab_1)
+        self.today_tasks_table.setGeometry(QtCore.QRect(0, 0, 1791, 731))
+        self.today_tasks_table.setObjectName("today_tasks_table")
+        self.today_tasks_table.setColumnCount(0)
+        self.today_tasks_table.setRowCount(0)
         self.main_tabs.addTab(self.tab_1, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
+        self.week_tasks_table = QtWidgets.QTableWidget(parent=self.tab_2)
+        self.week_tasks_table.setGeometry(QtCore.QRect(0, 0, 1791, 731))
+        self.week_tasks_table.setObjectName("week_tasks_table")
+        self.week_tasks_table.setColumnCount(0)
+        self.week_tasks_table.setRowCount(0)
         self.main_tabs.addTab(self.tab_2, "")
         self.label = QtWidgets.QLabel(parent=self.main_screen)
         self.label.setGeometry(QtCore.QRect(20, 20, 431, 18))
@@ -180,12 +190,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.base()  # Создание базы основных заданий
         self.Add_task_button.clicked.connect(self.add_task)  # Подключаем сигнал кнопки добавления задания
         self.Delete_task_button.clicked.connect(self.delete_task)  # Подключаем сигнал кнопки удаления задания
-        self.rewrite_task_button.clicked.connect(self.rewrite_task)# Подключаем сигнал кнопки перезаписи
+        self.rewrite_task_button.clicked.connect(self.rewrite_task)  # Подключаем сигнал кнопки перезаписи
         self.del_all_button.clicked.connect(self.del_all)
         self.filter_button.clicked.connect(self.filter)  # Подключаем сигнал кнопки фильтрации
         self.navigation()  # Отдельная функция для навигации по стеку
         self.init_main_table()  # Иницилизирование модели таблицы
-
+        self.main_tabs.currentChanged.connect(self.tab_chaged)
+    #Это база
     def base(self):
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
@@ -195,11 +206,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         subject TEXT,
         task TEXT,
-        deadline DATE,
+        deadline TEXT,
         priority TEXT,
         stat TEXT)
         """)
-
+    """Всё для вкладки 'Все задания'"""
     def init_main_table(self):
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
@@ -225,10 +236,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         result = cur.execute("""SELECT * FROM all_tasks""")
         rows = result.fetchall()
         # Заполняем модель данными
-        for row_index, row_data in enumerate(rows):
-            for col_index, cell_data in enumerate(row_data):
-                item = QStandardItem(str(cell_data))
-                self.model_of_main.setItem(row_index, col_index - 1, item)
+        self.filler_of_model(self.model_of_main, rows)
 
         con.commit()
         con.close()
@@ -283,83 +291,68 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             con.commit()
             con.close()
 
-    # Дописать QmessageBox
     def rewrite_task(self):  # Перезапись строк в модели и в базе
         dialog = RewriteTaskDialog(self)
         result = dialog.exec()
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
         inp = str(dialog.line_edit.text()).split(", ")
-        if result == QDialog.DialogCode.Accepted:  # то что в таблице до редактирования
-            line = []
-            for column in range(self.model_of_main.columnCount()):
-                index = self.model_of_main.index(int(inp[0]) - 1, column)
-                value = self.model_of_main.data(index)
-                line.append(value)
-            pr_subject, pr_task, pr_deadline, pr_priority, pr_stat = line  # Старые значения строки в бд
-            # заполнение таблицы новыми данными
-            line = str(dialog.line_edit.text()).split(", ")
-            row = int(line[0])
-            for i in range(self.model_of_main.columnCount() - 2):
-                index = self.model_of_main.index(row - 1, i)  # строка-1, столбец i
-                self.model_of_main.setData(index, line[i + 1])  # изменение данных по индексу
-            index = self.model_of_main.index(row - 1, 3)
-            self.model_of_main.setData(index, dialog.priority.currentText())
-            index = self.model_of_main.index(row - 1, 4)
-            self.model_of_main.setData(index, dialog.status.currentText())
-        # Перезаписываем в бд
-        updater = """
-        UPDATE all_tasks 
-        SET subject = ?, task = ?, deadline = ?, priority = ?, stat = ? 
-        WHERE subject = ? AND task = ? AND deadline = ? AND priority = ? AND stat = ?
-        """
-        cur.execute(updater, (
-            line[1],  # новый subject
-            line[2],  # новый task
-            line[3],  # новый deadline
-            dialog.priority.currentText(),  # новый priority
-            dialog.status.currentText(),  # новый stat
-            pr_subject,
-            pr_task,
-            pr_deadline,
-            pr_priority,
-            pr_stat
-        ))
-        con.commit()
-    # Дописать QmessageBox
+        if result == QDialog.DialogCode.Accepted:# то что в таблице до редактирования
+            try:
+                pr_subject, pr_task, pr_deadline, pr_priority, pr_stat = self.get_data_from_model_row(self.model_of_main,
+                                                                                                      int(inp[
+                                                                                                              0]))  # Старые значения строки в бд
+                # заполнение таблицы новыми данными
+                line = str(dialog.line_edit.text()).split(", ")
+                row = int(line[0])
+                for i in range(self.model_of_main.columnCount() - 2):
+                    index = self.model_of_main.index(row - 1, i)  # строка-1, столбец i
+                    self.model_of_main.setData(index, line[i + 1])  # изменение данных по индексу
+                self.model_of_main.setData(self.model_of_main.index(row - 1, 3), dialog.priority.currentText())
+                self.model_of_main.setData(self.model_of_main.index(row - 1, 4), dialog.status.currentText())
+                # Перезаписываем в бд
+                updater = """
+                UPDATE all_tasks 
+                SET subject = ?, task = ?, deadline = ?, priority = ?, stat = ? 
+                WHERE subject = ? AND task = ? AND deadline = ? AND priority = ? AND stat = ?
+                """
+                cur.execute(updater, (
+                    line[1],  # новый subject
+                    line[2],  # новый task
+                    line[3],  # новый deadline
+                    dialog.priority.currentText(),  # новый priority
+                    dialog.status.currentText(),  # новый stat
+                    pr_subject,
+                    pr_task,
+                    pr_deadline,
+                    pr_priority,
+                    pr_stat
+                ))
+                con.commit()
+            except ValueError:
+                QMessageBox.critical(None, "Ошибка", "Неправильный формат ввода")
+            finally:
+                con.commit()
+                con.close()
+
     def filter(self):
-        self.model_of_main.clear()  # отчищаем табл от всех заданий
-        self.model_of_main.setHorizontalHeaderLabels(
-            ["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])  # Ставим заголовки т.к. они тоже очистились
+        self.model_of_main.clear()
+        self.model_of_main.setHorizontalHeaderLabels(["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
-        if self.filter_subject.text() == "" and self.filter_priority.currentText() == "Любой":
-            finder = """SELECT * FROM all_tasks"""
-            result = cur.execute(finder)
-            rows = result.fetchall()
-        elif self.filter_subject.text() == "" and self.filter_priority.currentText() != "Любой":
-            needs = self.filter_priority.currentText()  # Фильтр тех что нужны
-            # Выполняем запрос с условием отделения
-            finder = """SELECT * FROM all_tasks WHERE priority = ?"""
-            result = cur.execute(finder, (needs,))
-            rows = result.fetchall()
-        elif self.filter_priority.currentText() == "Любой":
-            needs = self.filter_subject.text()  # Фильтр тех что нужны
-            # Выполняем запрос с условием отделения
-            finder = """SELECT * FROM all_tasks WHERE subject = ?"""
-            result = cur.execute(finder, (needs,))
-            rows = result.fetchall()
-        else:
-            needs = [self.filter_subject.text(), self.filter_priority.currentText()]  # Фильтр тех что нужны
-            # Выполняем запрос с условием отделения
-            finder = """SELECT * FROM all_tasks WHERE subject = ? AND priority = ?"""
-            result = cur.execute(finder, (needs[0], needs[1]))
-            rows = result.fetchall()
+        subject = self.filter_subject.text()
+        priority = self.filter_priority.currentText()
+        # Логика фильтрации
+        if subject and priority != "Любой":
+            rows = self.subject_priority_filter(cur, subject, priority)
+        elif subject:  # subject != "" and priority == "Любой"
+            rows = self.subject_filter(cur, subject)
+        elif priority != "Любой":  # subject == "" and priority != "Любой"
+            rows = self.priority_filter(cur, priority)
+        else:  # subject == "" and priority == "Любой"
+            rows = self.all_tasks_filter(cur)
             # Заполняем модель данными
-        for row_index, row_data in enumerate(rows):
-            for col_index, cell_data in enumerate(row_data):
-                item = QStandardItem(str(cell_data))
-                self.model_of_main.setItem(row_index, col_index - 1, item)
+        self.filler_of_model(self.model_of_main, rows)
 
     def del_all(self):
         result = QMessageBox.question(
@@ -380,6 +373,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             pass
 
+    """Реализация вкладки 'Сегодня'"""
+
+    def init_today_table(self):
+        con = sqlite3.connect("all_tasks.db")
+        cur = con.cursor()
+        nowtime = datetime.datetime.now()
+        all_row = cur.execute("SELECT * FROM all_tasks").fetchall()
+        rows = list()
+        for line in all_row:
+            deadline_date = datetime.datetime.strptime(line[3], "%d.%m.%y")
+            days_diff = (deadline_date - nowtime).days
+            if days_diff == 0:
+                rows.append(line)
+        self.today_tasks_table.setRowCount(len(rows))
+        self.today_tasks_table.setColumnCount(5)
+        self.today_tasks_table.setHorizontalHeaderLabels(["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])
+        self.today_tasks_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        for i in range(len(rows)):
+            for j in range(6):
+                self.today_tasks_table.setItem(i, j - 1, QTableWidgetItem(rows[i][j]))
+
+        con.close()
+
+    """Реализация вкладки 'На неделю'"""
+    def init_week_table(self): #Тоже-самое что с "Сегодня", только разница 6, а не 0
+        con = sqlite3.connect("all_tasks.db")
+        cur = con.cursor()
+        nowtime = datetime.datetime.now()
+        all_row = cur.execute("SELECT * FROM all_tasks").fetchall()
+        rows = list()
+        for line in all_row:
+            deadline_date = datetime.datetime.strptime(line[3], "%d.%m.%y")
+            days_diff = (deadline_date - nowtime).days
+            if days_diff == 6:
+                rows.append(line)
+        self.week_tasks_table.setRowCount(len(rows))
+        self.week_tasks_table.setColumnCount(5)
+        self.week_tasks_table.setHorizontalHeaderLabels(["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])
+        self.week_tasks_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        print(rows)
+        for i in range(len(rows)):
+            for j in range(6):
+                self.week_tasks_table.setItem(i, j - 1, QTableWidgetItem(rows[i][j]))
+
+        con.close()
+
     def navigation(self):  # подключение кнопок навигации по стеку
         self.settings_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
         self.settings_button_2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
@@ -388,6 +427,62 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.back_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
         self.back_button_2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
 
+    def tab_chaged(self, index):#Функция отслеживания изменения таблиц и инициализация соответсвующих таблиц других вкладок
+        name_of_tab = self.main_tabs.tabText(index) #какую вкладку по имени открыли
+
+        if name_of_tab == "Сегодня":
+            self.init_today_table()
+
+        elif name_of_tab == "На неделю":
+            self.init_week_table()
+
+    """Вспомогательные функции"""
+    @staticmethod  # вспомогательная функция заполнения модели данных
+    def filler_of_model(model, rows):
+        for row_index, row_data in enumerate(rows):
+            for col_index, cell_data in enumerate(row_data):
+                item = QStandardItem(str(cell_data))
+                model.setItem(row_index, col_index - 1, item)
+
+    @staticmethod  # Получение данных из строки таблицы
+    def get_data_from_model_row(model, row):
+        line = []
+        for column in range(5):
+            index = model.index(row - 1, column)
+            value = model.data(index)
+            line.append(value)
+        return line
+
+    @staticmethod  # Фильтрация по предмету
+    def subject_filter(cur, subject):
+        # Выполняем запрос с условием отделения
+        finder = """SELECT * FROM all_tasks WHERE subject = ?"""
+        result = cur.execute(finder, (subject,))
+        return result.fetchall()
+
+    @staticmethod  # Фильтр по предмету и приоритету
+    def subject_priority_filter(cur, subject, priority):
+        """Фильтрация по предмету и приоритету"""
+        finder = """SELECT * FROM all_tasks WHERE subject = ? AND priority = ?"""
+        result = cur.execute(finder, (subject, priority))
+        return result.fetchall()
+
+    @staticmethod  # Фильтр по приоритету
+    def priority_filter(cur, priority):
+        # Выполняем запрос с условием отделения
+        finder = """SELECT * FROM all_tasks WHERE priority = ?"""
+        result = cur.execute(finder, (priority,))
+        return result.fetchall()
+
+    @staticmethod  # Если нет параметров фильтрации, а кнопку нажали
+    def all_tasks_filter(cur):
+        finder = """SELECT * FROM all_tasks"""
+        result = cur.execute(finder)
+        return result.fetchall()
+
+    @staticmethod
+    def refresh_model(model):
+        pass
 
 # Модальное окно для добавления задания
 class AddTaskDialog(QDialog):
