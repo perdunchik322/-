@@ -143,7 +143,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.main_tabs.setToolTip(_translate("MainWindow", "<html><head/><body><p>выф</p></body></html>"))
+        self.main_screen.setToolTip(_translate("MainWindow", "<html><head/><body><p>выф</p></body></html>"))
         self.Add_task_button.setText(_translate("MainWindow", "+Добавить"))
         self.Delete_task_button.setText(_translate("MainWindow", "Удалить"))
         self.rewrite_task_button.setText(_translate("MainWindow", "Перезаписать"))
@@ -322,14 +322,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             pr_stat
         ))
         con.commit()
-
+    # Дописать QmessageBox
     def filter(self):
         self.model_of_main.clear()  # отчищаем табл от всех заданий
         self.model_of_main.setHorizontalHeaderLabels(
             ["Предмет", "Задание", "Дедлайн", "Приоритет", "Статус"])  # Ставим заголовки т.к. они тоже очистились
         con = sqlite3.connect("all_tasks.db")
         cur = con.cursor()
-        if self.filter_priority.currentText() == "Любой":
+        if self.filter_subject.text() == "" and self.filter_priority.currentText() == "Любой":
+            finder = """SELECT * FROM all_tasks"""
+            result = cur.execute(finder)
+            rows = result.fetchall()
+        elif self.filter_subject.text() == "" and self.filter_priority.currentText() != "Любой":
+            needs = self.filter_priority.currentText()  # Фильтр тех что нужны
+            # Выполняем запрос с условием отделения
+            finder = """SELECT * FROM all_tasks WHERE priority = ?"""
+            result = cur.execute(finder, (needs,))
+            rows = result.fetchall()
+        elif self.filter_priority.currentText() == "Любой":
             needs = self.filter_subject.text()  # Фильтр тех что нужны
             # Выполняем запрос с условием отделения
             finder = """SELECT * FROM all_tasks WHERE subject = ?"""
@@ -346,9 +356,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for col_index, cell_data in enumerate(row_data):
                 item = QStandardItem(str(cell_data))
                 self.model_of_main.setItem(row_index, col_index - 1, item)
-
-    def logger(self):
-        pass  # В разработке
 
     def navigation(self):  # подключение кнопок навигации по стеку
         self.settings_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
