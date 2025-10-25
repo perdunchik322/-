@@ -36,7 +36,7 @@ class Ui_MainWindow(object):
         self.tableView_of_tasks.setGeometry(QtCore.QRect(0, 40, 1791, 691))
         self.tableView_of_tasks.setObjectName("tableView_of_tasks")
         self.widget = QtWidgets.QWidget(parent=self.tab_3)
-        self.widget.setGeometry(QtCore.QRect(10, 10, 856, 30))
+        self.widget.setGeometry(QtCore.QRect(10, 10, 971, 30))
         self.widget.setObjectName("widget")
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.widget)
         self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
@@ -69,6 +69,9 @@ class Ui_MainWindow(object):
         self.filter_priority.addItem("")
         self.filter_priority.addItem("")
         self.horizontalLayout_6.addWidget(self.filter_priority)
+        self.del_all_button = QtWidgets.QPushButton(parent=self.widget)
+        self.del_all_button.setObjectName("del_all_button")
+        self.horizontalLayout_6.addWidget(self.del_all_button)
         self.main_tabs.addTab(self.tab_3, "")
         self.tab_1 = QtWidgets.QWidget()
         self.tab_1.setObjectName("tab_1")
@@ -153,6 +156,7 @@ class Ui_MainWindow(object):
         self.filter_priority.setItemText(1, _translate("MainWindow", "Средний"))
         self.filter_priority.setItemText(2, _translate("MainWindow", "Низкий"))
         self.filter_priority.setItemText(3, _translate("MainWindow", "Любой"))
+        self.del_all_button.setText(_translate("MainWindow", "Очистить всё"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.tab_3), _translate("MainWindow", "Все задания"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.tab_1), _translate("MainWindow", "Сегодня"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.tab_2), _translate("MainWindow", "На неделю"))
@@ -165,7 +169,6 @@ class Ui_MainWindow(object):
         self.back_button_2.setText(_translate("MainWindow", "Назад"))
         self.settings_button_2.setText(_translate("MainWindow", "Настройки"))
 
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -177,7 +180,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.base()  # Создание базы основных заданий
         self.Add_task_button.clicked.connect(self.add_task)  # Подключаем сигнал кнопки добавления задания
         self.Delete_task_button.clicked.connect(self.delete_task)  # Подключаем сигнал кнопки удаления задания
-        self.rewrite_task_button.clicked.connect(self.rewrite_task)  # Подключаем сигнал кнопки перезаписи
+        self.rewrite_task_button.clicked.connect(self.rewrite_task)# Подключаем сигнал кнопки перезаписи
+        self.del_all_button.clicked.connect(self.del_all)
         self.filter_button.clicked.connect(self.filter)  # Подключаем сигнал кнопки фильтрации
         self.navigation()  # Отдельная функция для навигации по стеку
         self.init_main_table()  # Иницилизирование модели таблицы
@@ -356,6 +360,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for col_index, cell_data in enumerate(row_data):
                 item = QStandardItem(str(cell_data))
                 self.model_of_main.setItem(row_index, col_index - 1, item)
+
+    def del_all(self):
+        result = QMessageBox.question(
+            self,  # родительское окно
+            "Подтверждение удаления",  # заголовок
+            "Вы уверены, что хотите удалить ВСЁ?",  # текст
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,  # кнопки
+            QMessageBox.StandardButton.No  # кнопка по умолчанию
+        )
+        if result == QMessageBox.StandardButton.Yes:
+            self.model_of_main.clear()
+            con = sqlite3.connect("all_tasks.db")
+            cur = con.cursor()
+            # Удаляем все записи из таблицы
+            cur.execute("DELETE FROM all_tasks")
+            con.commit()
+            con.close()
+        else:
+            pass
 
     def navigation(self):  # подключение кнопок навигации по стеку
         self.settings_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
